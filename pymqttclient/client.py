@@ -10,7 +10,7 @@ from paho.mqtt import client as mqtt
 
 class MQTTClient:
     def __init__(self, client_id: str = None, host: str = "localhost", port: int = 1883,
-                 subscriptions: Set[str] = frozenset(), callbacks: Set[Callable] = frozenset,
+                 subscriptions: Set[str] = frozenset(), callbacks: Set[Callable] = frozenset(),
                  reconnect_delay: float = 1.0, reconnect_msg_interval: int = 5):
         self.client_id: str = client_id
         if self.client_id is None:
