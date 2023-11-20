@@ -55,7 +55,7 @@ class MQTTClient:
         self.publish(topic=topic, payload=json.dumps(payload_dict).encode())
 
     def on_message(self, client, userdata, msg):
-        logging.info(f"MQTTClient {self.client_id} received message. topic: {msg.topic} payload: {msg.payload}")
+        logging.debug(f"MQTTClient {self.client_id} received message. topic: {msg.topic} payload: {msg.payload}")
         for callback in self.callbacks:
             callback(topic=msg.topic, payload=msg.payload)
 
