@@ -3,7 +3,7 @@ import logging
 import threading
 import time
 import uuid
-from typing import Set, Dict, Callable
+from typing import Set, Dict, Callable, Any
 
 from paho.mqtt import client as mqtt
 
@@ -23,7 +23,8 @@ class MQTTClient:
         self.reconnect_msg_interval: int = reconnect_msg_interval
         if not self.subscriptions:
             self.subscriptions = {"#"}
-        self.client: mqtt.Client = mqtt.Client(client_id=self.client_id)
+        self.client: mqtt.Client = mqtt.Client(client_id=self.client_id,
+                                               callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
         threading.Thread(daemon=True, target=self.connect).start()
         logging.info(f"MQTTClient {self.client_id} configured with address {self.host}:{self.port} "
                      f"reconnect_delay: {self.reconnect_delay}s "
@@ -54,17 +55,19 @@ class MQTTClient:
     def publish_dict(self, topic: str, payload_dict: Dict):
         self.publish(topic=topic, payload=json.dumps(payload_dict).encode())
 
-    def on_message(self, client, userdata, msg):
+    def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         logging.debug(f"MQTTClient {self.client_id} received message. topic: {msg.topic} payload: {msg.payload}")
         for callback in self.callbacks:
             callback(topic=msg.topic, payload=msg.payload)
 
-    def on_connect(self, client, userdata, flags, rc):
+    def on_connect(self, client: mqtt.Client, userdata: Any, connect_flags: mqtt.ConnectFlags,
+                   reason_code: mqtt.ReasonCode, properties: mqtt.Properties) -> None:
         logging.info(f"MQTTClient {self.client_id} connected to {self.host}:{self.port}.")
         for sub in self.subscriptions:
             self.client.subscribe(topic=sub)
 
-    def on_disconnect(self, client, userdata, rc):
+    def on_disconnect(self, client: mqtt.Client, userdata: any, disconnect_flags: mqtt.DisconnectFlags,
+                      reason_code: mqtt.ReasonCode, properties: mqtt.Properties):
         logging.info(f"MQTTClient {self.client_id} disconnected. Attempting reconnect...")
         while not self.client.is_connected():
             self.client.reconnect()
