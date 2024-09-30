@@ -33,11 +33,11 @@ class MQTTClient:
                      f"reconnect_msg_interval: {self.reconnect_msg_interval} "
                      f"subscriptions: {self.subscriptions}.")
 
-    def publish(self, topic: str, payload: bytes):
-        self.client.publish(topic=topic, payload=payload)
+    def publish(self, topic: str, payload: bytes, retain: bool = False):
+        self.client.publish(topic=topic, payload=payload, retain=retain)
 
-    def publish_dict(self, topic: str, payload_dict: Dict):
-        self.publish(topic=topic, payload=json.dumps(payload_dict).encode())
+    def publish_dict(self, topic: str, payload_dict: Dict, retain: bool = False):
+        self.publish(topic=topic, payload=json.dumps(payload_dict).encode(), retain=retain)
 
     def cleanup(self):
         self.is_running = False
